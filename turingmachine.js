@@ -5,6 +5,7 @@ class TuringMachine {
         this.state;
         this.tape = tape || [];
         this.tapePos = 0;
+        this.steps = [];
     }
 
     executeCommands(commands) {
@@ -13,7 +14,25 @@ class TuringMachine {
         this.state = commands[0].startState;
 
         commands = this.sortStructurCommands(commands);
-        
+
+        // Start the first execution manually
+        console.log(`-- Executing TM`);
+        const executeStartTime = performance.now();
+        const firstExec = this.execute(0, commands);
+        this.steps.push(firstExec);
+        this.tape = firstExec.newTape
+        this.state = firstExec.newState;
+        this.tapePos = firstExec.newPos;
+
+        let loopStepResult;
+        do {
+            loopStepResult = this.execute(this.tapePos, commands);
+            this.steps.push(loopStepResult);
+            this.tape = loopStepResult.newTape
+            this.state = loopStepResult.newState;
+            this.tapePos = loopStepResult.newPos;
+        } while (loopStepResult.newState !== 'halt');
+        console.log(`-- Executing TM done in ${performance.now() - executeStartTime}ms using ${this.steps.length} steps`);
     }
 
     sortStructurCommands(commands) {
@@ -33,6 +52,20 @@ class TuringMachine {
             stateSortedCommands[command.startState][command.readSymbol] = command;
         }
         console.log(`-- Sorting and structuring done in ${performance.now() - stateSortingCommandsTimeStart}ms`);
+        return stateSortedCommands;
+    }
+
+    execute(pos, commands) {
+        const readSymbol = this.tape[pos] || '_';
+        const newTape = this.tape.slice(0);     newTape[pos] = commands[this.state][readSymbol].writeSymbol;
+        const newState = commands[this.state][readSymbol].nextState;
+        const newPos = pos + (commands[this.state][readSymbol].moveDirection === 'r' ? 1 : -1);
+
+        return {
+            newTape,
+            newState,
+            newPos
+        };
     }
 }
 

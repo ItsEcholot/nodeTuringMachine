@@ -11,6 +11,8 @@ class App {
 
             this.turingMachine = new TuringMachine(parseRes.tape);
             this.turingMachine.executeCommands(parseRes.commands, process.argv[3] === 'steps');
+
+            console.log(`All done... Exiting`);
         }).catch(err => console.error(err));
     }
 }

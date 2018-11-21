@@ -79,8 +79,8 @@ class TuringMachine {
         let cloneStepResultTape = stepResult.newTape.slice(0);
         cloneStepResultTape[stepResult.newPos] = stepResult.newTape[stepResult.newPos] ? '➧'.concat(stepResult.newTape[stepResult.newPos]) : '➧_';
 
-        let oldString = '';
-        let newString = '';
+        let oldString = `${oldStep.newState}: `;
+        let newString = `${stepResult.newState}: `;
 
         for (let i = oldStep.newPos - 15; i < oldStep.newPos + 15; i++) {
             oldString += oldStep.newTape[i] ? oldStep.newTape[i] : '_';
@@ -135,7 +135,18 @@ class TuringMachine {
 
         const newTape = this.tape.slice(0);     newTape[pos] = commands[this.state][readSymbol].writeSymbol;
         const newState = commands[this.state][readSymbol].nextState;
-        const newPos = pos + (commands[this.state][readSymbol].moveDirection === 'r' ? 1 : -1);
+        let newPos;
+        switch (commands[this.state][readSymbol].moveDirection) {
+            case 'r':
+                newPos = pos + 1;
+                break;
+            case 'l':
+                newPos = pos - 1;
+                break;
+            case '*':
+                newPos = pos;
+                break;
+        }
 
         return {
             newTape,

@@ -33,16 +33,17 @@ class Parser {
             lineCounter++;
 
             // Comment line, ignore
-            if (line.charAt(0) === '#')
+            if (line.charAt(0) === ';')
                 continue;
 
             if (lineCounter === 1 && line.includes('TAPE:')) {
                 tape.push(...(line.split('TAPE: ')[1]));
+                console.log(`Found tape ${tape}`);
                 continue;
             }
 
             const args = line.split(' ');
-            if (args.length === 5) {
+            if (args.length >= 5) {
                 commands.push({
                     startState: args[0],
                     readSymbol: args[1],

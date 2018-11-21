@@ -8,31 +8,29 @@ class TuringMachine {
         this.steps = [];
     }
 
-    executeCommands(commands) {
-        // Starting state will be the startState of the first command
+    executeCommands(commands, stepsMode) {
+        // Starting state will be the startState of the first command and push the initial state to the steps
         console.log(`Setting starting state to ${commands[0].startState} based on first command`);
         this.state = commands[0].startState;
+        this.steps.push({
+            newTape: this.tape,
+            newState: this.state,
+            newPos: this.tapePos,
+        });
 
         commands = this.sortStructurCommands(commands);
-
-        // Start the first execution manually
-        console.log(`-- Executing TM`);
-        const executeStartTime = performance.now();
-        const firstExec = this.execute(0, commands);
-        this.steps.push(firstExec);
-        this.tape = firstExec.newTape
-        this.state = firstExec.newState;
-        this.tapePos = firstExec.newPos;
-
-        let loopStepResult;
-        do {
-            loopStepResult = this.execute(this.tapePos, commands);
-            this.steps.push(loopStepResult);
-            this.tape = loopStepResult.newTape
-            this.state = loopStepResult.newState;
-            this.tapePos = loopStepResult.newPos;
-        } while (loopStepResult.newState !== 'halt');
-        console.log(`-- Executing TM done in ${performance.now() - executeStartTime}ms using ${this.steps.length} steps`);
+        if (stepsMode) {
+            process.stdin.resume();
+            process.stdin.on('data', key => {
+                const execResult = this.stepExecution(commands);
+                if (!execResult)
+                    process.exit(0);
+                else
+                    this.stepPrint(execResult);
+            });
+        } else {
+            this.autoExecution(commands);
+        }
     }
 
     sortStructurCommands(commands) {
@@ -55,8 +53,86 @@ class TuringMachine {
         return stateSortedCommands;
     }
 
+    stepExecution(commands) {
+        let stepResult = this.execute(this.tapePos, commands);
+        this.steps.push(stepResult);
+        this.tape = stepResult.newTape
+        this.state = stepResult.newState;
+        this.tapePos = stepResult.newPos;
+
+        if (stepResult.newState === 'halt') {
+            console.log(`Reached halt state, TM accepted the tape`);
+            return false;
+        }
+        else if (!stepResult) {
+            console.log(`Didn't reach a halt state, TM didn't accept the tape`);
+            return false;
+        }
+
+        return stepResult;
+    }
+
+    stepPrint(stepResult) {
+        const oldStep = this.steps[this.steps.length-2] ? this.steps[this.steps.length-2] : null;
+        oldStep.newTape[oldStep.newPos] = oldStep.newTape[oldStep.newPos] ? '➧'.concat(oldStep.newTape[oldStep.newPos]) : '➧_';
+
+        let cloneStepResultTape = stepResult.newTape.slice(0);
+        cloneStepResultTape[stepResult.newPos] = stepResult.newTape[stepResult.newPos] ? '➧'.concat(stepResult.newTape[stepResult.newPos]) : '➧_';
+
+        let oldString = '';
+        let newString = '';
+
+        for (let i = oldStep.newPos - 15; i < oldStep.newPos + 15; i++) {
+            oldString += oldStep.newTape[i] ? oldStep.newTape[i] : '_';
+        }
+        for (let i = stepResult.newPos - 15; i < stepResult.newPos + 15; i++) {
+            newString += cloneStepResultTape[i] ? cloneStepResultTape[i] : '_';
+        }
+
+        console.log(`${oldString} ⟶ ${newString}`);
+    }
+
+    autoExecution(commands) {
+        // Start the first execution manually
+        console.log(`-- Executing TM`);
+        const executeStartTime = performance.now();
+        const firstExec = this.execute(0, commands);
+        if (firstExec) {
+            this.steps.push(firstExec);
+            this.tape = firstExec.newTape
+            this.state = firstExec.newState;
+            this.tapePos = firstExec.newPos;
+        } 
+        else {
+            console.log(`Didn't reach a halt state, TM didn't accept the tape`);
+            return;
+        }
+
+        let loopStepResult;
+        do {
+            loopStepResult = this.execute(this.tapePos, commands);
+            this.steps.push(loopStepResult);
+            this.tape = loopStepResult.newTape
+            this.state = loopStepResult.newState;
+            this.tapePos = loopStepResult.newPos;
+        } while (this.steps.length < 10000000 && loopStepResult && loopStepResult.newState !== 'halt');
+
+        if (loopStepResult.newState === 'halt')
+            console.log(`Reached halt state, TM accepted the tape`);
+        else if (!loopStepResult)
+            console.log(`Didn't reach a halt state, TM didn't accept the tape`);
+        else if (loopSteps > 10000000)
+            console.log(`Didn't reach a halt state after 10'000'000 steps, probably an endless loop`);
+
+        console.log(`-- Executing TM done in ${performance.now() - executeStartTime}ms using ${this.steps.length-1} steps`);
+    }
+
     execute(pos, commands) {
         const readSymbol = this.tape[pos] || '_';
+
+        if (!commands[this.state] || !commands[this.state][readSymbol])
+            return false;
+
         const newTape = this.tape.slice(0);     newTape[pos] = commands[this.state][readSymbol].writeSymbol;
         const newState = commands[this.state][readSymbol].nextState;
         const newPos = pos + (commands[this.state][readSymbol].moveDirection === 'r' ? 1 : -1);

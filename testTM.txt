@@ -3,26 +3,26 @@ TAPE: ababaa
 0 b b r 0
 0 x x l eb
 0 _ _ l eb
-#
+;
 eb a x r a
 eb b x r b
 eb _ _ r x
-#
+;
 a x x r a
 a b b r a
 a a a r a
 a _ a l t0
-#
+;
 b x x r b
 b b b r b
 b a a r b
 b _ b l t0
-#
+;
 t0 a a l t0
 t0 b b l t0
 t0 x x l t0
 t0 _ _ r 0
-#
+;
 x x _ r x
 x a a r halt
 x b b r halt

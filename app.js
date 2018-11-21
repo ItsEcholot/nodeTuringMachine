@@ -8,10 +8,9 @@ class App {
 
         this.parser.loadFile(process.argv[2]).then(file => {
             const parseRes = this.parser.parseFile(file);
-            // console.dir(parseRes); 
 
             this.turingMachine = new TuringMachine(parseRes.tape);
-            this.turingMachine.executeCommands(parseRes.commands);
+            this.turingMachine.executeCommands(parseRes.commands, process.argv[3] === 'steps');
         }).catch(err => console.error(err));
     }
 }

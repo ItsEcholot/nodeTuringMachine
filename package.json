@@ -1,0 +1,14 @@
+{
+  "name": "nodeTuringMachine",
+  "version": "1.0.0",
+  "description": "Yeah you guessed it, it's a turing machine... Made in node",
+  "main": "index.js",
+  "repository": "https://github.com/ItsEcholot/nodeTuringMachine.git",
+  "author": "Marc Berchtold <me@echolot.io>",
+  "license": "MIT",
+  "private": false,
+
+  "scripts": {
+    "start": "node index.js"
+  }
+}

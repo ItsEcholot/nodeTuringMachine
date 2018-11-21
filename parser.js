@@ -1,4 +1,5 @@
 const fs                = require('fs');
+const {performance}     = require('perf_hooks');
 
 class Parser {
     constructor() {
@@ -6,19 +7,23 @@ class Parser {
     }
 
     loadFile(filePath) {
-        console.log(`Loading file ${filePath}`);
+        console.log(`-- Loading file ${filePath}`);
+        const loadFileTimeStart = performance.now();
         return new Promise((resolve, reject) => {
             fs.readFile(filePath, 'utf-8', (err, data) => {
                 if (err)
                     reject(err);
-                else
+                else {
+                    console.log(`-- Loading file done in ${performance.now() - loadFileTimeStart}ms`);
                     resolve(data);
+                }
             });
         });
     }
 
     parseFile(fileContents) {
-        console.log(`Parsing file contents`);
+        console.log(`-- Parsing file contents`);
+        const parseTimeStart = performance.now();
         const lines = fileContents.split(/[\r\n]+/);
         const commands = [];
         const tape = [];
@@ -51,6 +56,7 @@ class Parser {
             }
         }
 
+        console.log(`-- Parsing file contents done in ${performance.now() - parseTimeStart}ms`);
         return {commands, tape};
     }
 }

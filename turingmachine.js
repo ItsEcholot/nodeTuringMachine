@@ -23,11 +23,14 @@ class TuringMachine {
         if (stepsMode) {
             process.stdin.resume();
             process.stdin.on('data', key => {
+                const execStartTime = performance.now();
                 const execResult = this.stepExecution(commands);
-                if (!execResult)
+                if (!execResult) {
+                    this.resultPrint();
                     process.exit(0);
+                }
                 else
-                    this.stepPrint(execResult);
+                    this.stepPrint(execResult, performance.now() - execStartTime);
             });
         } else {
             this.autoExecution(commands);
@@ -73,8 +76,6 @@ class TuringMachine {
                 }
             }
         }
-        console.dir(commands);
-
         return commands;
     }
 
@@ -97,7 +98,7 @@ class TuringMachine {
         return stepResult;
     }
 
-    stepPrint(stepResult) {
+    stepPrint(stepResult, msNeeded) {
         const oldStep = this.steps[this.steps.length-2] ? this.steps[this.steps.length-2] : null;
         oldStep.newTape[oldStep.newPos] = oldStep.newTape[oldStep.newPos] ? '➧'.concat(oldStep.newTape[oldStep.newPos]) : '➧_';
 
@@ -119,7 +120,39 @@ class TuringMachine {
             newString += cloneStepResultTape[i] ? cloneStepResultTape[i] : '_';
         }
 
-        console.log(`${oldString} ⟶ ${newString}`);
+        if (msNeeded)
+            console.log(`${oldString} ⟶ ${newString} ⟶ ${msNeeded}ms`);
+        else
+            console.log(`${oldString} ⟶ ${newString}`);
+    }
+
+    resultPrint() {
+        let lowestIndex = 0;
+        let highestIndex = 0;
+        for (let index in this.tape) {
+            index = parseInt(index);
+            if (index < lowestIndex)
+                lowestIndex = index;
+            if (index > highestIndex)
+                highestIndex = index;
+        }
+        const resultArray = [];
+        let foundResult = false;
+        for (let i = lowestIndex; i < highestIndex; i++) {
+            if (this.tape[i] === '_' && !foundResult)
+                continue;
+            else if (this.tape[i] !== '_') {
+                foundResult = true;
+                resultArray.push(this.tape[i]);
+            }
+            else
+                break;
+        }
+
+        let result = '';
+        resultArray.map(el => result += el);
+        
+        console.log(`Final result: ${result}`);
     }
 
     autoExecution(commands) {
@@ -145,19 +178,21 @@ class TuringMachine {
             this.tape = loopStepResult.newTape
             this.state = loopStepResult.newState;
             this.tapePos = loopStepResult.newPos;
-        } while (this.steps.length < 10000000 && loopStepResult && loopStepResult.newState !== 'halt');
+        } while (this.steps.length < 1000000 && loopStepResult && loopStepResult.newState !== 'halt');
 
         if (loopStepResult.newState === 'halt')
             console.log(`Reached halt state, TM accepted the tape`);
         else if (!loopStepResult)
             console.log(`Didn't reach a halt state, TM didn't accept the tape`);
-        else if (loopSteps > 10000000)
-            console.log(`Didn't reach a halt state after 10'000'000 steps, probably an endless loop`);
+        else if (loopSteps > 1000000)
+            console.log(`Didn't reach a halt state after 1'000'000 steps, probably an endless loop`);
 
         console.log(`-- Executing TM done in ${performance.now() - executeStartTime}ms using ${this.steps.length-1} steps`);
         
         if (loopStepResult)
             this.stepPrint(loopStepResult);
+
+        this.resultPrint();
     }
 
     execute(pos, commands) {

@@ -27,6 +27,7 @@ class Parser {
         const lines = fileContents.split(/[\r\n]+/);
         const commands = [];
         const tape = [];
+        const tapeAlphabet = [];
 
         let lineCounter = 0;
         for (const line of lines) {
@@ -44,6 +45,11 @@ class Parser {
 
             const args = line.split(' ');
             if (args.length >= 5) {
+                if (!tapeAlphabet.includes(args[1]))
+                    tapeAlphabet.push(args[1]);
+                if (!tapeAlphabet.includes(args[2]))
+                    tapeAlphabet.push(args[2]);
+
                 commands.push({
                     startState: args[0],
                     readSymbol: args[1],
@@ -58,7 +64,7 @@ class Parser {
         }
 
         console.log(`-- Parsing file contents done in ${performance.now() - parseTimeStart}ms`);
-        return {commands, tape};
+        return {commands, tape, tapeAlphabet};
     }
 }
 

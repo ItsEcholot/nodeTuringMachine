@@ -1,9 +1,10 @@
 const {performance}             = require('perf_hooks');
 
 class TuringMachine {
-    constructor(tape) {
+    constructor(tape, tapeAlphabet) {
         this.state;
         this.tape = tape || [];
+        this.tapeAlphabet = tapeAlphabet || [];
         this.tapePos = 0;
         this.steps = [];
     }
@@ -36,7 +37,7 @@ class TuringMachine {
     sortStructurCommands(commands) {
         console.log(`-- Sorting and structuring commands by startState and readSymbol`);
         const stateSortingCommandsTimeStart = performance.now();
-        const stateSortedCommands = {};
+        let stateSortedCommands = {};
         for (const command of commands) {
             if (!stateSortedCommands[command.startState]) {
                 stateSortedCommands[command.startState] = {};
@@ -49,8 +50,32 @@ class TuringMachine {
 
             stateSortedCommands[command.startState][command.readSymbol] = command;
         }
+
+        stateSortedCommands = this.replaceWildcardCommands(stateSortedCommands);
         console.log(`-- Sorting and structuring done in ${performance.now() - stateSortingCommandsTimeStart}ms`);
         return stateSortedCommands;
+    }
+
+    replaceWildcardCommands(commands) {
+        for (let state in commands) {
+            for (let readSymbol in commands[state]) {
+                if (readSymbol === '*') {
+                    for (let tapeAlphabetSymbol of this.tapeAlphabet) {
+                        const replacementCommand = {...commands[state]['*']};
+                        replacementCommand.readSymbol = tapeAlphabetSymbol;
+                        if (replacementCommand.writeSymbol === '*')
+                            replacementCommand.writeSymbol = tapeAlphabetSymbol;
+
+                        if (!commands[state][tapeAlphabetSymbol]) {
+                            commands[state][tapeAlphabetSymbol] = replacementCommand;
+                        }
+                    }
+                }
+            }
+        }
+        console.dir(commands);
+
+        return commands;
     }
 
     stepExecution(commands) {
@@ -77,6 +102,11 @@ class TuringMachine {
         oldStep.newTape[oldStep.newPos] = oldStep.newTape[oldStep.newPos] ? '➧'.concat(oldStep.newTape[oldStep.newPos]) : '➧_';
 
         let cloneStepResultTape = stepResult.newTape.slice(0);
+        // Fix negative indexes getting lost in clone
+        for (let index in stepResult.newTape) {
+            if (index < 0)
+                cloneStepResultTape[index] = stepResult.newTape[index];
+        }
         cloneStepResultTape[stepResult.newPos] = stepResult.newTape[stepResult.newPos] ? '➧'.concat(stepResult.newTape[stepResult.newPos]) : '➧_';
 
         let oldString = `${oldStep.newState}: `;
@@ -125,6 +155,9 @@ class TuringMachine {
             console.log(`Didn't reach a halt state after 10'000'000 steps, probably an endless loop`);
 
         console.log(`-- Executing TM done in ${performance.now() - executeStartTime}ms using ${this.steps.length-1} steps`);
+        
+        if (loopStepResult)
+            this.stepPrint(loopStepResult);
     }
 
     execute(pos, commands) {
@@ -133,7 +166,14 @@ class TuringMachine {
         if (!commands[this.state] || !commands[this.state][readSymbol])
             return false;
 
-        const newTape = this.tape.slice(0);     newTape[pos] = commands[this.state][readSymbol].writeSymbol;
+        let newTape = this.tape.slice(0);  
+        // Fix negative indexes getting lost in clone
+        for (let index in this.tape) {
+            if (index < 0)
+                newTape[index] = this.tape[index];
+        }
+        newTape[pos] = commands[this.state][readSymbol].writeSymbol;
+
         const newState = commands[this.state][readSymbol].nextState;
         let newPos;
         switch (commands[this.state][readSymbol].moveDirection) {

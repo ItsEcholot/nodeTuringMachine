@@ -1,4 +1,4 @@
-TAPE: 110101010011110_110101010011110
+TAPE: BIN(33)_BIN(33)
 ; Binary multiplication machine - multiplies two numbers given in binary
 ; Input: two numbers in binary, separated by a space, eg "101 1101"
 ; Output: the product of the two inputs, in binary

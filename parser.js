@@ -29,6 +29,8 @@ class Parser {
         const tape = [];
         const tapeAlphabet = [];
 
+        const binaryMacroRegex = /BIN\(\d+\)/g;
+
         let lineCounter = 0;
         for (const line of lines) {
             lineCounter++;
@@ -38,8 +40,20 @@ class Parser {
                 continue;
 
             if (lineCounter === 1 && line.includes('TAPE:')) {
-                tape.push(...(line.split('TAPE: ')[1]));
-                console.log(`Found tape ${tape}`);
+                let tapeTemp = line.split('TAPE: ')[1];
+
+                const binMacros = tapeTemp.match(binaryMacroRegex);
+                if (binMacros.length > 0)
+                    console.log(`Found BIN() Macro, converting to binary`);
+                for (let binMacro of binMacros) {
+                    const intString = binMacro.replace('BIN(', '').replace(')', '');
+                    const binString = (parseInt(intString, 10) >>> 0).toString(2)
+                    tapeTemp = tapeTemp.replace(binMacro, binString);
+                }
+
+                tape.push(...tapeTemp);
+
+                console.log(`Found tape ${tapeTemp}`);
                 continue;
             }
 

@@ -3,7 +3,7 @@ const TuringMachine         = require('./turingmachine');
 
 class App {
     constructor() {
-        console.log(`Starting node turing machine`);
+        console.log(`Starting node turing machine 🧐`);
         this.parser = new Parser();
 
         this.parser.loadFile(process.argv[2]).then(file => {
@@ -13,7 +13,7 @@ class App {
             this.turingMachine.executeCommands(parseRes.commands, process.argv[3] === 'steps');
 
             if (process.argv[3] !== 'steps')
-                console.log(`All done... Exiting`);
+                console.log(`All done... Exiting 🥳`);
         }).catch(err => console.error(err));
     }
 }

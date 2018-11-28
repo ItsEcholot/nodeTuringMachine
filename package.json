@@ -7,8 +7,8 @@
   "author": "Marc Berchtold <me@echolot.io>",
   "license": "MIT",
   "private": false,
-
   "scripts": {
     "start": "node index.js"
-  }
+  },
+  "dependencies": {}
 }

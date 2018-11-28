@@ -121,9 +121,9 @@ class TuringMachine {
         }
 
         if (msNeeded)
-            console.log(`${oldString} ⟶ ${newString} ⟶ ${msNeeded}ms`);
+            console.log(`Step ${this.steps.length-1} ⟶ ${oldString} ⟶ ${newString} ⟶ ${msNeeded}ms`);
         else
-            console.log(`${oldString} ⟶ ${newString}`);
+            console.log(`Step ${this.steps.length-1} ⟶ ${oldString} ⟶ ${newString}`);
     }
 
     resultPrint() {
@@ -153,6 +153,10 @@ class TuringMachine {
         resultArray.map(el => result += el);
         
         console.log(`Final result: ${result}`);
+
+        if (/[0,1]+/g.test(result)) {
+            console.log(`Detected binary final result, converted to decimal: ${parseInt(result, 2)}`)
+        }
     }
 
     autoExecution(commands) {
@@ -187,7 +191,8 @@ class TuringMachine {
         else if (loopSteps > 1000000)
             console.log(`Didn't reach a halt state after 1'000'000 steps, probably an endless loop`);
 
-        console.log(`-- Executing TM done in ${performance.now() - executeStartTime}ms using ${this.steps.length-1} steps`);
+        const executeEndTime = performance.now();
+        console.log(`-- Executing TM done in ${executeEndTime - executeStartTime}ms using ${this.steps.length-1} steps -> ${(executeEndTime - executeStartTime) / (this.steps.length-1)}ms per step`);
         
         if (loopStepResult)
             this.stepPrint(loopStepResult);

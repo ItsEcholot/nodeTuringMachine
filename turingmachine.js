@@ -60,6 +60,7 @@ class TuringMachine {
     }
 
     replaceWildcardCommands(commands) {
+        console.log(`-- Replacing wildcards in commands`);
         for (let state in commands) {
             for (let readSymbol in commands[state]) {
                 if (readSymbol === '*') {
@@ -136,6 +137,8 @@ class TuringMachine {
             if (index > highestIndex)
                 highestIndex = index;
         }
+        highestIndex++;
+
         const resultArray = [];
         let foundResult = false;
         for (let i = lowestIndex; i < highestIndex; i++) {
@@ -154,7 +157,9 @@ class TuringMachine {
         
         console.log(`Final result: ${result}`);
 
-        if (/[0,1]+/g.test(result)) {
+        if (/l+/g.test(result)) {
+            console.log(`Detected unary final result, converted to decimal: ${result.length}`);
+        } else if (/[0,1]+/g.test(result)) {
             console.log(`Detected binary final result, converted to decimal: ${parseInt(result, 2)}`)
         }
     }

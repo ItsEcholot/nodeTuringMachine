@@ -22,4 +22,9 @@ The steps argument is optional and enables the manual stepping through mode wher
     - You can insert * for x to match every symbol which hasn't an explicit transition defined.
     - You can insert * for y if you inserted * for x to write the same symbol that has been read (no change).
 
+## Tape macros
+
+- BIN(*decimal number*) converts decimal number to a binary string on the tape
+- UNARY(*decimal number*) converts decimal number to an unary represantation created with l's on the tape
+
 For more information take a look at the provided example TMs in this repo.

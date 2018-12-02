@@ -1,0 +1,44 @@
+TAPE: UNARY(2)xUNARY(7)
+;
+;-------------------Setup tape-------------------
+q0 l l r q0
+q0 x x r q7
+;
+q7 l o r q7
+q7 _ _ l q8
+;
+q8 * * l q8
+q8 _ _ r q1
+;-------------------End Setup tape-------------------
+q1 1 1 r q1
+q1 l 1 r q2 ;Replace one l with a 1 to signify that it has been accounted for
+q1 x x r q10 ;After 1's there's an x --> no more l's to replace, we're done.
+;
+q2 l l r q2 ;Skip all l's and move to the x operator
+q2 x x r q3
+;
+q3 m m r q3 ;Skip all m's
+q3 o m r q4 ;Replace one o with an m to signify that it has been accounted for
+q3 l l l q6 ;We have reached to end of the original tape --> no more o's to replace we're done with this round.
+;
+q4 * * r q4 ;Move to the end of the tape
+q4 _ l l q5 ;Add an l to the tape
+;
+q5 * * l q5 ;Let's move back to the x operator
+q5 x x r q3 ;and start again
+;
+q6 m o l q6 ;We added all l's for this 1 symbol, replace all m with o's again for next round
+q6 x x l q9 ;and move back
+;
+q9 l l l q9 ;to the first l that hasn't been replaced with a 1 yet
+q9 1 1 r q1 ;and start again
+;
+q10 o o r q10
+q10 l l l q11 ;Move to the end of the original tape
+;
+q11 * _ l q11 ;Remove everything of the original tape
+q11 l l l q11
+q11 _ _ r q12 ;Done removing everything
+;
+q12 _ _ r q12 ;let's move back to the beginning of the result
+q12 l l * halt ;aaand that's it

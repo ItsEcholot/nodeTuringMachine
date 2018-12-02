@@ -30,6 +30,7 @@ class Parser {
         const tapeAlphabet = [];
 
         const binaryMacroRegex = /BIN\(\d+\)/g;
+        const unaryMacroRegex = /UNARY\(\d+\)/g;
 
         let lineCounter = 0;
         for (const line of lines) {
@@ -43,12 +44,23 @@ class Parser {
                 let tapeTemp = line.split('TAPE: ')[1];
 
                 const binMacros = tapeTemp.match(binaryMacroRegex);
-                if (binMacros.length > 0)
+                if (binMacros && binMacros.length > 0) {
                     console.log(`Found BIN() Macro, converting to binary`);
-                for (let binMacro of binMacros) {
-                    const intString = binMacro.replace('BIN(', '').replace(')', '');
-                    const binString = (parseInt(intString, 10) >>> 0).toString(2)
-                    tapeTemp = tapeTemp.replace(binMacro, binString);
+                    for (let binMacro of binMacros) {
+                        const intString = binMacro.replace('BIN(', '').replace(')', '');
+                        const binString = (parseInt(intString, 10) >>> 0).toString(2)
+                        tapeTemp = tapeTemp.replace(binMacro, binString);
+                    }
+                }
+
+                const unaryMacros = tapeTemp.match(unaryMacroRegex);
+                if (unaryMacros && unaryMacros.length > 0) {
+                    console.log(`Found UNARY() Macro, converting number to amount of l's`);
+                    for (let unaryMacro of unaryMacros) {
+                        const intString = unaryMacro.replace('UNARY(', '').replace(')', '');
+                        const unaryString = 'l'.repeat(parseInt(intString, 10));
+                        tapeTemp = tapeTemp.replace(unaryMacro, unaryString);
+                    }
                 }
 
                 tape.push(...tapeTemp);

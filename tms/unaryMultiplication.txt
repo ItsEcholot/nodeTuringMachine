@@ -1,4 +1,4 @@
-TAPE: UNARY(2)xUNARY(7)
+TAPE: UNARY(17)xUNARY(2)
 ;
 ;-------------------Setup tape-------------------
 q0 l l r q0
@@ -20,6 +20,7 @@ q2 x x r q3
 q3 m m r q3 ;Skip all m's
 q3 o m r q4 ;Replace one o with an m to signify that it has been accounted for
 q3 l l l q6 ;We have reached to end of the original tape --> no more o's to replace we're done with this round.
+q3 _ _ * q12 ;We have nothing after the x --> Move to the end of the multiplication
 ;
 q4 * * r q4 ;Move to the end of the tape
 q4 _ l l q5 ;Add an l to the tape
@@ -38,7 +39,7 @@ q10 l l l q11 ;Move to the end of the original tape
 ;
 q11 * _ l q11 ;Remove everything of the original tape
 q11 l l l q11
-q11 _ _ r q12 ;Done removing everything
+q11 _ _ r halt ;Done removing everything, and thaaat's it.
 ;
-q12 _ _ r q12 ;let's move back to the beginning of the result
-q12 l l * halt ;aaand that's it
+q12 * _ l q12 ;Special cleanup when there was 0 l's as the second operand
+q12 1 _ l q11

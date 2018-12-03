@@ -128,6 +128,9 @@ class TuringMachine {
     }
 
     resultPrint() {
+        if (!this.tape)
+            return;
+
         let lowestIndex = 0;
         let highestIndex = 0;
         for (let index in this.tape) {
@@ -193,7 +196,7 @@ class TuringMachine {
             console.log(`Reached halt state, TM accepted the tape`);
         else if (!loopStepResult)
             console.log(`Didn't reach a halt state, TM didn't accept the tape`);
-        else if (loopSteps > 1000000)
+        else if (this.steps.length > 1000000)
             console.log(`Didn't reach a halt state after 1'000'000 steps, probably an endless loop`);
 
         const executeEndTime = performance.now();
